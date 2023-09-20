@@ -1,6 +1,7 @@
 import unittest
 
 from vm_translator.parser import Parser
+from vm_translator.command import CommandType
 
 
 class TestParser(unittest.TestCase):
@@ -48,4 +49,3 @@ class TestParser(unittest.TestCase):
             parser = Parser(command)
             parser.advance()
             self.assertEqual(parser.command_type(), CommandType.C_ARITHMETIC)
-
