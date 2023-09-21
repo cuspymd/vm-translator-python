@@ -1,12 +1,13 @@
 from typing import List
 
-from vm_translator.command import CommandType
+from vm_translator.command import CommandType, Command
 
 
 class Parser:
     def __init__(self, file_text: str):
         self.lines = self._get_valid_lines(file_text)
         self.current_line_number = -1
+        self.current_command: Command = None
 
     def _get_valid_lines(self, file_text: str) -> List[str]:
         return [
@@ -29,6 +30,13 @@ class Parser:
 
     def advance(self):
         self.current_line_number += 1
+        self.current_command = Command(self.lines[self.current_line_number])
 
-    def command_type(self):
-        return CommandType.C_ARITHMETIC
+    def command_type(self) -> CommandType:
+        return self.current_command.command_type
+
+    def arg1(self) -> str:
+        return self.current_command.arg1
+
+    def arg2(self) -> int:
+        return self.current_command.arg2

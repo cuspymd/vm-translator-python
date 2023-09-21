@@ -49,3 +49,33 @@ class TestParser(unittest.TestCase):
             parser = Parser(command)
             parser.advance()
             self.assertEqual(parser.command_type(), CommandType.C_ARITHMETIC)
+
+    def test_command_type_given_stack_command(self):
+        parser = Parser("push constant 17\npop local 2")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_PUSH)
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_POP)
+
+    def test_arg_given_arithmetic_command(self):
+        parser = Parser("add")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "add")
+
+    def test_arg_given_push_command(self):
+        parser = Parser("push constant 1")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "constant")
+        self.assertEqual(parser.arg2(), 1)
+
+    def test_arg_given_pop_command(self):
+        parser = Parser("pop temp 12")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "temp")
+        self.assertEqual(parser.arg2(), 12)
+
+    def test_arg_given_invalid_type(self):
+        parser = Parser("sub")
+        parser.advance()
+        with self.assertRaises(Exception):
+            parser.arg2()
