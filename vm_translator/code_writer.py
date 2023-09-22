@@ -31,6 +31,9 @@ M=M+1
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
+    def write_end(self):
+        self._file.write("(END)\n@END\n0;JMP\n")
+
     def write_arithmetic(self, command: str):
         match command:
             case "add":
@@ -65,13 +68,11 @@ M=M+1
         assem_template = '''D=D-M
 @THEN{index}
 D;{jump}
-@0
-D=A
+D=0
 @END{index}
-;JMP
+0;JMP
 (THEN{index})
-@1
-D=A
+D=-1
 (END{index})
 '''
         match command:

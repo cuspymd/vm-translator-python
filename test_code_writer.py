@@ -12,6 +12,7 @@ class TestCodeWriter(unittest.TestCase):
         self.assertFalse(code_writer._file.closed)
         code_writer.close()
         self.assertTrue(code_writer._file.closed)
+        os.remove("test.vm")
 
     def test_write_arithmetic_given_add(self):
         self._test_write_arthimetic("add")

@@ -9,13 +9,11 @@ A=M
 D=D-M
 @THEN1
 D;JEQ
-@0
-D=A
+D=0
 @END1
-;JMP
+0;JMP
 (THEN1)
-@1
-D=A
+D=-1
 (END1)
 @SP
 A=M
