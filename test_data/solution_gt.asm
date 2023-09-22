@@ -1,0 +1,24 @@
+// gt
+@SP
+M=M-1
+A=M
+D=M
+@SP
+M=M-1
+A=M
+D=D-M
+@THEN1
+D;JGT
+@0
+D=A
+@END1
+;JMP
+(THEN1)
+@1
+D=A
+(END1)
+@SP
+A=M
+M=D
+@SP
+M=M+1
