@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 
 class CodeWriter:
@@ -6,21 +7,24 @@ class CodeWriter:
         self._file = open(file_path, "w+")
         self._file_base_name = Path(file_path).stem
         self._branch_index = 1
-        self._first_pop = '''@SP
-M=M-1
-A=M
-D=M
-'''
-        self._second_pop = '''@SP
-M=M-1
-A=M
-'''
-        self._final_push = '''@SP
-A=M
-M=D
-@SP
-M=M+1
-'''
+        self._first_pop = [
+            "@SP",
+            "M=M-1",
+            "A=M",
+            "D=M",
+        ]
+        self._second_pop = [
+            "@SP",
+            "M=M-1",
+            "A=M",
+        ]
+        self._final_push = [
+            "@SP",
+            "A=M",
+            "M=D",
+            "@SP",
+            "M=M+1",
+        ]
 
     def close(self):
         self._file.close()
@@ -32,22 +36,38 @@ M=M+1
         self.close()
 
     def write_end(self):
-        self._file.write("(END)\n@END\n0;JMP\n")
+        end_statements = [
+            "(END)",
+            "@END",
+            "0;JMP",
+        ]
+        self._write_statements(end_statements)
+
+    def _write_statements(self, statements: List[str]):
+        statements = [self._post_process(statement) for statement in statements]
+        for statement in statements:
+            self._file.write(statement)
+
+    def _post_process(self, statement: str) -> str:
+        if statement[0] in ("(", "/"):
+            return f"{statement}\n"
+        else:
+            return f"  {statement}\n"
 
     def write_arithmetic(self, command: str):
         match command:
             case "add":
-                assem = self._get_binary_input_asm("add", "D=D+M\n")
+                assem = self._get_binary_input_asm("add", ["D=D+M"])
             case "sub":
-                assem = self._get_binary_input_asm("sub", "D=M-D\n")
+                assem = self._get_binary_input_asm("sub", ["D=M-D"])
             case "and":
-                assem = self._get_binary_input_asm("and", "D=D&M\n")
+                assem = self._get_binary_input_asm("and", ["D=D&M"])
             case "or":
-                assem = self._get_binary_input_asm("or", "D=D|M\n")
+                assem = self._get_binary_input_asm("or", ["D=D|M"])
             case "neg":
-                assem = self._get_unary_input_asm("neg", "D=-D\n")
+                assem = self._get_unary_input_asm("neg", ["D=-D"])
             case "not":
-                assem = self._get_unary_input_asm("not", "D=!D\n")
+                assem = self._get_unary_input_asm("not", ["D=!D"])
             case "eq":
                 assem = self._get_binary_input_asm("eq", self._get_comparison_asm("eq"))
             case "gt":
@@ -55,114 +75,143 @@ M=M+1
             case "lt":
                 assem = self._get_binary_input_asm("lt", self._get_comparison_asm("lt"))
 
-        self._file.write(assem)
+        self._write_statements(assem)
 
-    def _get_binary_input_asm(self, command_name: str, command_asm: str):
-        return f"// {command_name}\n" + self._first_pop + self._second_pop + \
-            command_asm + self._final_push
+    def _get_binary_input_asm(self, command_name: str, command_statements: List[str]) -> List[str]:
+        return [
+            f"// {command_name}",
+            *self._first_pop,
+            *self._second_pop,
+            *command_statements,
+            *self._final_push,
+        ]
 
-    def _get_unary_input_asm(self, command_name: str, command_asm: str):
-        return f"// {command_name}\n" + self._first_pop + command_asm + self._final_push
+    def _get_unary_input_asm(self, command_name: str, command_statements: List[str]) -> List[str]:
+        return [
+            f"// {command_name}",
+            *self._first_pop,
+            *command_statements,
+            *self._final_push,
+        ]
 
-    def _get_comparison_asm(self, command: str):
-        assem_template = '''D=M-D
-@THEN{index}
-D;{jump}
-D=0
-@END{index}
-0;JMP
-(THEN{index})
-D=-1
-(END{index})
-'''
-        match command:
-            case "eq":
-                assem = assem_template.format(jump="JEQ", index=self._branch_index)
-            case "gt":
-                assem = assem_template.format(jump="JGT", index=self._branch_index)
-            case "lt":
-                assem = assem_template.format(jump="JLT", index=self._branch_index)
-
+    def _get_comparison_asm(self, command: str) -> List[str]:
+        jump_symbol_table = {
+            "eq": "JEQ",
+            "gt": "JGT",
+            "lt": "JLT",
+        }
+        statements = [
+            "D=M-D",
+            f"@THEN{self._branch_index}",
+            f"D;{jump_symbol_table[command]}",
+            "D=0",
+            f"@END{self._branch_index}",
+            "0;JMP",
+            f"(THEN{self._branch_index})",
+            "D=-1",
+            f"(END{self._branch_index})",
+        ]
         self._branch_index += 1
-        return assem
+        return statements
 
     def write_push_pop(self, command: str, segment: str, index: int):
-        assem = f"// {command} {segment} {index}\n"
         segment_symbol_table = {
             "local": "LCL",
             "argument": "ARG",
             "this": "THIS",
             "that": "THAT",
         }
+        assem = [f"// {command} {segment} {index}"]
 
         match (command, segment, index):
             case ("push", ("local" | "argument" | "this" | "that") as segment, index):
-                assem += f'''@{segment_symbol_table[segment]}
-D=M
-@{index}
-A=D+A
-D=M
-{self._final_push}'''
+                assem += [
+                    f"@{segment_symbol_table[segment]}",
+                    "D=M",
+                    f"@{index}",
+                    "A=D+A",
+                    "D=M",
+                    *self._final_push,
+                ]
             case ("pop", ("local" | "argument" | "this" | "that") as segment, index):
-                assem += f'''@{segment_symbol_table[segment]}
-D=M
-@{index}
-D=D+A
-@R13
-M=D
-@SP
-M=M-1
-A=M
-D=M
-@R13
-A=M
-M=D
-'''
+                assem += [
+                    f"@{segment_symbol_table[segment]}",
+                    "D=M",
+                    f"@{index}",
+                    "D=D+A",
+                    "@R13",
+                    "M=D",
+                    "@SP",
+                    "M=M-1",
+                    "A=M",
+                    "D=M",
+                    "@R13",
+                    "A=M",
+                    "M=D",
+                ]
             case ("push", "pointer", 0):
-                assem += f'''@THIS
-D=M
-{self._final_push}'''
+                assem += [
+                    "@THIS",
+                    "D=M",
+                    *self._final_push,
+                ]
             case ("push", "pointer", 1):
-                assem += f'''@THAT
-D=M
-{self._final_push}'''
+                assem += [
+                    "@THAT",
+                    "D=M",
+                    *self._final_push,
+                ]
             case ("pop", "pointer", 0):
-                assem += f'''{self._first_pop}@THIS
-M=D
-'''
+                assem += [
+                    *self._first_pop,
+                    "@THIS",
+                    "M=D",
+                ]
             case ("pop", "pointer", 1):
-                assem += f'''{self._first_pop}@THAT
-M=D
-'''
+                assem += [
+                    *self._first_pop,
+                    "@THAT",
+                    "M=D",
+                ]
             case ("push", "temp", index):
-                assem += f'''@5
-D=A
-@{index}
-A=D+A
-D=M
-{self._final_push}'''
+                assem += [
+                    "@5",
+                    "D=A",
+                    f"@{index}",
+                    "A=D+A",
+                    "D=M",
+                    *self._final_push,
+                ]
             case ("pop", "temp", index):
-                assem += f'''@5
-D=A
-@{index}
-D=D+A
-@R13
-M=D
-{self._first_pop}@R13
-A=M
-M=D
-'''
+                assem += [
+                    "@5",
+                    "D=A",
+                    f"@{index}",
+                    "D=D+A",
+                    "@R13",
+                    "M=D",
+                    *self._first_pop,
+                    "@R13",
+                    "A=M",
+                    "M=D",
+                ]
             case ("push", "constant", index):
-                assem += f'''@{index}
-D=A
-{self._final_push}'''
+                assem += [
+                    f"@{index}",
+                    "D=A",
+                    *self._final_push,
+                ]
             case ("push", "static", index):
-                assem += f'''@{self._file_base_name}.{index}
-D=M
-{self._final_push}'''
+                assem += [
+                    f"@{self._file_base_name}.{index}",
+                    "D=M",
+                    *self._final_push,
+                ]
             case ("pop", "static", index):
-                assem += f'''{self._first_pop}@{self._file_base_name}.{index}
-M=D
-'''
+                assem += [
+                    *self._first_pop,
+                    f"@{self._file_base_name}.{index}",
+                    "M=D",
+                ]
 
-        self._file.write(assem)
+        self._write_statements(assem)
