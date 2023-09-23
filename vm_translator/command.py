@@ -40,5 +40,5 @@ class Command:
     @property
     def arg2(self) -> int:
         if self._arg2 is None:
-            raise Exception("Not suppored type")
+            raise Exception("Not supported type")
         return self._arg2
