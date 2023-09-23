@@ -39,7 +39,7 @@ M=M+1
             case "add":
                 assem = self._get_binary_input_asm("add", "D=D+M\n")
             case "sub":
-                assem = self._get_binary_input_asm("sub", "D=D-M\n")
+                assem = self._get_binary_input_asm("sub", "D=M-D\n")
             case "and":
                 assem = self._get_binary_input_asm("and", "D=D&M\n")
             case "or":
@@ -65,7 +65,7 @@ M=M+1
         return f"// {command_name}\n" + self._first_pop + command_asm + self._final_push
 
     def _get_comparison_asm(self, command: str):
-        assem_template = '''D=D-M
+        assem_template = '''D=M-D
 @THEN{index}
 D;{jump}
 D=0
