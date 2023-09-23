@@ -54,8 +54,26 @@ class TestCodeWriter(unittest.TestCase):
     def test_write_push_pop_given_push_local(self):
         self._test_write_push_pop("pushlocal2", [("push", "local", 2)])
 
+    def test_write_push_pop_given_push_argument(self):
+        self._test_write_push_pop("pushargument2", [("push", "argument", 2)])
+
+    def test_write_push_pop_given_push_this(self):
+        self._test_write_push_pop("pushthis2", [("push", "this", 2)])
+
+    def test_write_push_pop_given_push_that(self):
+        self._test_write_push_pop("pushthat2", [("push", "that", 2)])
+
     def test_write_push_pop_given_pop_local(self):
         self._test_write_push_pop("poplocal2", [("pop", "local", 2)])
+
+    def test_write_push_pop_given_pop_argument(self):
+        self._test_write_push_pop("popargument2", [("pop", "argument", 2)])
+
+    def test_write_push_pop_given_pop_this(self):
+        self._test_write_push_pop("popthis2", [("pop", "this", 2)])
+
+    def test_write_push_pop_given_pop_that(self):
+        self._test_write_push_pop("popthat2", [("pop", "that", 2)])
 
     def test_write_push_pop_given_push_pointer(self):
         self._test_write_push_pop("pushpointer", [

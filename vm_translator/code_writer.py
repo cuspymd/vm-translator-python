@@ -88,17 +88,23 @@ D=-1
 
     def write_push_pop(self, command: str, segment: str, index: int):
         assem = f"// {command} {segment} {index}\n"
+        segment_symbol_table = {
+            "local": "LCL",
+            "argument": "ARG",
+            "this": "THIS",
+            "that": "THAT",
+        }
 
         match (command, segment, index):
-            case ("push", "local", index):
-                assem += f'''@LCL
+            case ("push", ("local" | "argument" | "this" | "that") as segment, index):
+                assem += f'''@{segment_symbol_table[segment]}
 D=M
 @{index}
 A=D+A
 D=M
 {self._final_push}'''
-            case ("pop", "local", index):
-                assem += f'''@LCL
+            case ("pop", ("local" | "argument" | "this" | "that") as segment, index):
+                assem += f'''@{segment_symbol_table[segment]}
 D=M
 @{index}
 D=D+A
