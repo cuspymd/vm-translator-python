@@ -302,3 +302,46 @@ class CodeWriter:
             "D=M",
             *self._final_push,
         ]
+
+    def write_return(self):
+        statements = [
+            "// return",
+            "@LCL",
+            "D=M",
+            "@R13",
+            "M=D",
+            "@5",
+            "D=D-A",
+            "A=D",
+            "D=M",
+            "@R14",
+            "M=D",
+            *self._first_pop,
+            "@ARG",
+            "A=M",
+            "M=D",
+            "@ARG",
+            "D=M",
+            "D=D+1",
+            "@SP",
+            "M=D",
+            *self._get_recover_segment_asm("THAT", 1),
+            *self._get_recover_segment_asm("THIS", 2),
+            *self._get_recover_segment_asm("ARG", 3),
+            *self._get_recover_segment_asm("LCL", 4),
+            "@R14",
+            "0;JMP"
+        ]
+        self._write_statements(statements)
+
+    def _get_recover_segment_asm(self, segment: str, index: int) -> List[str]:
+        return [
+            "@R13",
+            "D=M",
+            f"@{index}",
+            "D=D-A",
+            "A=D",
+            "D=M",
+            f"@{segment}",
+            "M=D",
+        ]

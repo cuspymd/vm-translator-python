@@ -198,6 +198,15 @@ class TestCodeWriter(unittest.TestCase):
         self._verify_output(out_file)
         os.remove(out_file)
 
+    def test_write_return(self):
+        out_file = "Return.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_return()
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
     def _test_write_function(self, test_name: str, commands: List[Tuple[str, int]]):
         out_file = f"{test_name}.asm"
 
