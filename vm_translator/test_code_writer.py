@@ -108,6 +108,25 @@ class TestCodeWriter(unittest.TestCase):
     def test_write_function_given_2_vars(self):
         self._test_write_function("function2", [("Main.test", 2)])
 
+    def test_write_label_given_file(self):
+        out_file = "LabelFile.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_label("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_label_given_function(self):
+        out_file = "LabelFunction.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_function("LabelFunction.test", 0)
+            cw.write_label("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
     def _test_write_function(self, test_name: str, commands: List[Tuple[str, int]]):
         out_file = f"{test_name}.asm"
 

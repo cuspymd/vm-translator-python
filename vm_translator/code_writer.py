@@ -6,6 +6,7 @@ class CodeWriter:
     def __init__(self, file_path: str):
         self._file = open(file_path, "w+")
         self._file_base_name = Path(file_path).stem
+        self._current_function_name = ""
         self._branch_index = 1
         self._first_pop = [
             "@SP",
@@ -223,6 +224,7 @@ class CodeWriter:
             *self._get_push_nvars_asm(nvars),
         ]
         self._write_statements(statements)
+        self._current_function_name = function_name
 
     def _get_push_nvars_asm(self, nvars: int) -> List[str]:
         push_statements = [
@@ -233,3 +235,15 @@ class CodeWriter:
             "M=M+1",
         ]
         return [item for _ in range(nvars) for item in push_statements]
+
+    def write_label(self, label: str):
+        if self._current_function_name:
+            label_prefix = f"{self._current_function_name}"
+        else:
+            label_prefix = f"{self._file_base_name}"
+
+        statements = [
+            f"// label {label}",
+            f"({label_prefix}${label})",
+        ]
+        self._write_statements(statements)
