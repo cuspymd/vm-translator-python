@@ -7,6 +7,9 @@ from vm_translator.code_writer import CodeWriter
 
 
 class TestCodeWriter(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff = None
+
     def test_file_processing(self):
         code_writer = CodeWriter("test.vm")
         self.assertFalse(code_writer._file.closed)
@@ -161,6 +164,36 @@ class TestCodeWriter(unittest.TestCase):
         with CodeWriter(out_file) as cw:
             cw.write_function("IfInFunction.test", 0)
             cw.write_if("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_call_given_file(self):
+        out_file = "CallInFile.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_call("Math.add", 2)
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_call_given_function(self):
+        out_file = "CallInFunction.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_function("CallInFunction.test", 0)
+            cw.write_call("Math.add", 2)
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_call_given_multi_calls(self):
+        out_file = "CallGivenMultiCalls.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_function("CallGivenMultiCalls.test", 0)
+            cw.write_call("Math.add", 2)
+            cw.write_call("Math.sum", 0)
 
         self._verify_output(out_file)
         os.remove(out_file)

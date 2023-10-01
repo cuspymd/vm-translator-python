@@ -3,6 +3,8 @@ from typing import List
 
 
 class CodeWriter:
+    _return_index = 1
+
     def __init__(self, file_path: str):
         self._file = open(file_path, "w+")
         self._file_base_name = Path(file_path).stem
@@ -239,19 +241,19 @@ class CodeWriter:
     def write_label(self, label: str):
         statements = [
             f"// label {label}",
-            f"({self._get_label_prefix(label)}${label})",
+            f"({self._get_label_prefix()}${label})",
         ]
         self._write_statements(statements)
 
     def write_goto(self, label: str):
         statements = [
             f"// goto {label}",
-            f"@{self._get_label_prefix(label)}${label}",
+            f"@{self._get_label_prefix()}${label}",
             "0;JMP"
         ]
         self._write_statements(statements)
 
-    def _get_label_prefix(self, label: str):
+    def _get_label_prefix(self):
         return f"{self._current_function_name}" if self._current_function_name \
             else f"{self._file_base_name}"
 
@@ -259,7 +261,44 @@ class CodeWriter:
         statements = [
             f"// if {label}",
             *self._first_pop,
-            f"@{self._get_label_prefix(label)}${label}",
+            f"@{self._get_label_prefix()}${label}",
             "D;JNE"
         ]
         self._write_statements(statements)
+
+    def write_call(self, function_name: str, nvars: int):
+        return_label = f"{self._get_label_prefix()}$ret.{self._return_index}"
+        statements = [
+            f"// call {function_name} {nvars}",
+            f"@{return_label}",
+            "D=A",
+            *self._final_push,
+            *self._get_push_segment_asm("LCL"),
+            *self._get_push_segment_asm("ARG"),
+            *self._get_push_segment_asm("THIS"),
+            *self._get_push_segment_asm("THAT"),
+            "@SP",
+            "D=M",
+            "@5",
+            "D=D-A",
+            f"@{nvars}",
+            "D=D-A",
+            "@ARG",
+            "M=D",
+            "@SP",
+            "D=M",
+            "@LCL",
+            "M=D",
+            f"@{function_name}",
+            "0;JMP",
+            f"({return_label})"
+        ]
+        self._write_statements(statements)
+        self._return_index += 1
+
+    def _get_push_segment_asm(self, segment: str) -> List[str]:
+        return [
+            f"@{segment}",
+            "D=M",
+            *self._final_push,
+        ]
