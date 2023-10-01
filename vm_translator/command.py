@@ -24,6 +24,30 @@ class Command:
                 self._command_type = CommandType.C_POP
                 self._arg1 = arg1
                 self._arg2 = int(arg2)
+            case ["label", label]:
+                self._command_type = CommandType.C_LABEL
+                self._arg1 = label
+                self._arg2 = None
+            case ["goto", label]:
+                self._command_type = CommandType.C_GOTO
+                self._arg1 = label
+                self._arg2 = None
+            case ["if-goto", label]:
+                self._command_type = CommandType.C_IF
+                self._arg1 = label
+                self._arg2 = None
+            case ["function", function_name, nvars]:
+                self._command_type = CommandType.C_FUNCTION
+                self._arg1 = function_name
+                self._arg2 = int(nvars)
+            case ["call", function_name, nvars]:
+                self._command_type = CommandType.C_CALL
+                self._arg1 = function_name
+                self._arg2 = int(nvars)
+            case ["return"]:
+                self._command_type = CommandType.C_RETURN
+                self._arg1 = None
+                self._arg2 = None
             case [command, *_]:
                 self._command_type = CommandType.C_ARITHMETIC
                 self._arg1 = command

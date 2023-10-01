@@ -50,6 +50,36 @@ class TestParser(unittest.TestCase):
             parser.advance()
             self.assertEqual(parser.command_type(), CommandType.C_ARITHMETIC)
 
+    def test_command_type_given_label_command(self):
+        parser = Parser("label LABEL")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_LABEL)
+
+    def test_command_type_given_goto_command(self):
+        parser = Parser("goto LABEL")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_GOTO)
+
+    def test_command_type_given_if_command(self):
+        parser = Parser("if-goto LABEL")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_IF)
+
+    def test_command_type_given_function_command(self):
+        parser = Parser("function FUNC 0")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_FUNCTION)
+
+    def test_command_type_given_call_command(self):
+        parser = Parser("call FUNC 0")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_CALL)
+
+    def test_command_type_given_return_command(self):
+        parser = Parser("return")
+        parser.advance()
+        self.assertEqual(parser.command_type(), CommandType.C_RETURN)
+
     def test_command_type_given_stack_command(self):
         parser = Parser("push constant 17\npop local 2")
         parser.advance()
