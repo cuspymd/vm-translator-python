@@ -102,6 +102,22 @@ class TestCodeWriter(unittest.TestCase):
     def test_write_push_pop_given_pop_static(self):
         self._test_write_push_pop("popstatic2", [("pop", "static", 2)])
 
+    def test_write_function_given_no_vars(self):
+        self._test_write_function("function0", [("Main.test", 0)])
+
+    def test_write_function_given_2_vars(self):
+        self._test_write_function("function2", [("Main.test", 2)])
+
+    def _test_write_function(self, test_name: str, commands: List[Tuple[str, int]]):
+        out_file = f"{test_name}.asm"
+
+        with CodeWriter(out_file) as cw:
+            for (function_name, nvars) in commands:
+                cw.write_function(function_name, nvars)
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
     def _test_write_push_pop(self, test_name: str, commands: List[Tuple[str, str, int]]):
         out_file = f"{test_name}.asm"
 

@@ -215,3 +215,21 @@ class CodeWriter:
                 ]
 
         self._write_statements(assem)
+
+    def write_function(self, function_name: str, nvars: int):
+        statements = [
+            f"// function {function_name} {nvars}",
+            f"({function_name})",
+            *self._get_push_nvars_asm(nvars),
+        ]
+        self._write_statements(statements)
+
+    def _get_push_nvars_asm(self, nvars: int) -> List[str]:
+        push_statements = [
+            "@SP",
+            "A=M",
+            "M=0",
+            "@SP",
+            "M=M+1",
+        ]
+        return [item for _ in range(nvars) for item in push_statements]
