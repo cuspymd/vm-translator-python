@@ -38,14 +38,6 @@ class CodeWriter:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def write_end(self):
-        end_statements = [
-            "(END)",
-            "@END",
-            "0;JMP",
-        ]
-        self._write_statements(end_statements)
-
     def _write_statements(self, statements: List[str]):
         statements = [self._post_process(statement) for statement in statements]
         for statement in statements:
