@@ -146,6 +146,25 @@ class TestCodeWriter(unittest.TestCase):
         self._verify_output(out_file)
         os.remove(out_file)
 
+    def test_write_if_given_file(self):
+        out_file = "IfInFile.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_if("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_if_given_function(self):
+        out_file = "IfInFunction.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_function("IfInFunction.test", 0)
+            cw.write_if("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
     def _test_write_function(self, test_name: str, commands: List[Tuple[str, int]]):
         out_file = f"{test_name}.asm"
 

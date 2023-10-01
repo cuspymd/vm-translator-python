@@ -254,3 +254,12 @@ class CodeWriter:
     def _get_label_prefix(self, label: str):
         return f"{self._current_function_name}" if self._current_function_name \
             else f"{self._file_base_name}"
+
+    def write_if(self, label: str):
+        statements = [
+            f"// if {label}",
+            *self._first_pop,
+            f"@{self._get_label_prefix(label)}${label}",
+            "D;JNE"
+        ]
+        self._write_statements(statements)
