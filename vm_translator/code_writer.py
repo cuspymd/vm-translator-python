@@ -237,13 +237,20 @@ class CodeWriter:
         return [item for _ in range(nvars) for item in push_statements]
 
     def write_label(self, label: str):
-        if self._current_function_name:
-            label_prefix = f"{self._current_function_name}"
-        else:
-            label_prefix = f"{self._file_base_name}"
-
         statements = [
             f"// label {label}",
-            f"({label_prefix}${label})",
+            f"({self._get_label_prefix(label)}${label})",
         ]
         self._write_statements(statements)
+
+    def write_goto(self, label: str):
+        statements = [
+            f"// goto {label}",
+            f"@{self._get_label_prefix(label)}${label}",
+            "0;JMP"
+        ]
+        self._write_statements(statements)
+
+    def _get_label_prefix(self, label: str):
+        return f"{self._current_function_name}" if self._current_function_name \
+            else f"{self._file_base_name}"

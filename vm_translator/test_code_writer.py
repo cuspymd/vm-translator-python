@@ -109,7 +109,7 @@ class TestCodeWriter(unittest.TestCase):
         self._test_write_function("function2", [("Main.test", 2)])
 
     def test_write_label_given_file(self):
-        out_file = "LabelFile.asm"
+        out_file = "LabelInFile.asm"
 
         with CodeWriter(out_file) as cw:
             cw.write_label("LABEL")
@@ -118,11 +118,30 @@ class TestCodeWriter(unittest.TestCase):
         os.remove(out_file)
 
     def test_write_label_given_function(self):
-        out_file = "LabelFunction.asm"
+        out_file = "LabelInFunction.asm"
 
         with CodeWriter(out_file) as cw:
-            cw.write_function("LabelFunction.test", 0)
+            cw.write_function("LabelInFunction.test", 0)
             cw.write_label("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_goto_given_file(self):
+        out_file = "GotoInFile.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_goto("LABEL")
+
+        self._verify_output(out_file)
+        os.remove(out_file)
+
+    def test_write_goto_given_function(self):
+        out_file = "GotoInFunction.asm"
+
+        with CodeWriter(out_file) as cw:
+            cw.write_function("GotoInFunction.test", 0)
+            cw.write_goto("LABEL")
 
         self._verify_output(out_file)
         os.remove(out_file)
