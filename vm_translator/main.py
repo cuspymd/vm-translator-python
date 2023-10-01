@@ -1,12 +1,20 @@
 import sys
 import os
+from pathlib import Path
 
 from vm_translator.parser import Parser
 from vm_translator.code_writer import CodeWriter
 from vm_translator.command import CommandType
 
 
-def translate(input_path: str):
+def translate(input_path_str: str):
+    input_path = Path(input_path_str)
+    if input_path.is_file():
+        translate_file(input_path_str)
+    elif input_path.is_dir():
+        translate_folder(input_path)
+
+def translate_file(input_path: str) -> Path:
     folder_path, file_name = os.path.split(input_path)
     file_base_name, _ = os.path.splitext(file_name)
     output_path = os.path.join(folder_path, f"{file_base_name}.asm")
@@ -39,6 +47,17 @@ def translate(input_path: str):
                 case CommandType.C_RETURN:
                     code_writer.write_return()
 
+    return Path(output_path)
+
+
+def translate_folder(input_folder: Path):
+    vm_files = input_folder.glob("*.vm")
+    asm_files = [translate_file(str(vm_file)) for vm_file in vm_files]
+
+    out_file_path = input_folder.with_suffix(".asm")
+    with out_file_path.open(mode="w") as out_file:
+        for asm_file in asm_files:
+            
 
 if __name__ == "__main__":
     print(f"Start translating for '{sys.argv[1]}'")

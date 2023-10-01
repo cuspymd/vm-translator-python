@@ -1,5 +1,6 @@
 import unittest
 import os
+from pathlib import Path
 import vm_translator.main as main
 
 
@@ -8,13 +9,17 @@ class TestMain(unittest.TestCase):
         self.maxDiff = None
 
     def test_main_given_stack_commands(self):
-        self._test_vm_file("Add")
+        self._test_vm("Add.vm")
 
     def test_main_given_control_commands(self):
-        self._test_vm_file("Control")
+        self._test_vm("Control.vm")
 
-    def _test_vm_file(self, test_name: str):
-        main.translate(f"test_data/{test_name}.vm")
+    def test_main_given_folder(self):
+        self._test_vm("TestFolder")
+
+    def _test_vm(self, test_dest: str):
+        test_name = Path(test_dest).stem
+        main.translate(f"test_data/{test_dest}")
 
         out_file_path = f"test_data/{test_name}.asm"
         with open(out_file_path, "r") as out_file:
