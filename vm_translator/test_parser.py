@@ -109,3 +109,30 @@ class TestParser(unittest.TestCase):
         parser.advance()
         with self.assertRaises(Exception):
             parser.arg2()
+
+    def test_arg_given_label_command(self):
+        parser = Parser("label LABEL")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "LABEL")
+
+    def test_arg_given_goto_command(self):
+        parser = Parser("goto LABEL")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "LABEL")
+
+    def test_arg_given_if_command(self):
+        parser = Parser("if-goto LABEL")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "LABEL")
+
+    def test_arg_given_function_command(self):
+        parser = Parser("function FUNC 0")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "FUNC")
+        self.assertEqual(parser.arg2(), 0)
+
+    def test_arg_given_call_command(self):
+        parser = Parser("call FUNC 0")
+        parser.advance()
+        self.assertEqual(parser.arg1(), "FUNC")
+        self.assertEqual(parser.arg2(), 0)
