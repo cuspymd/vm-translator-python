@@ -54,7 +54,7 @@ def translate_file(input_path: str) -> Path:
 def translate_folder(input_folder: Path):
     vm_files = sorted(input_folder.glob("*.vm"))
     asm_files = [translate_file(str(vm_file)) for vm_file in vm_files]
-    out_file_path = input_folder.with_suffix(".asm")
+    out_file_path = input_folder / f"{input_folder.name}.asm"
 
     with out_file_path.open(mode="w") as out_file:
         for asm_file_path in asm_files:

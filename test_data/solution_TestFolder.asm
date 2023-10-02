@@ -124,6 +124,7 @@
   @LCL
   M=D
   @R14
+  A=M
   0;JMP
 // > Math.asm
 // function Math.add 2
@@ -230,4 +231,5 @@
   @LCL
   M=D
   @R14
+  A=M
   0;JMP

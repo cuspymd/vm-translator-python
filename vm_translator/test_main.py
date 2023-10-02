@@ -22,9 +22,12 @@ class TestMain(unittest.TestCase):
 
     def _test_vm(self, test_dest: str):
         test_name = Path(test_dest).stem
+        is_folder = test_name == test_dest
         main.translate(f"test_data/{test_dest}")
 
-        out_file_path = f"test_data/{test_name}.asm"
+        out_file_path = f"test_data/{test_name}/{test_name}.asm" if is_folder else \
+            f"test_data/{test_name}.asm"
+
         with open(out_file_path, "r") as out_file:
             out_assem = out_file.read()
 

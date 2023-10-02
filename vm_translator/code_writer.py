@@ -321,7 +321,8 @@ class CodeWriter:
             *self._get_recover_segment_asm("ARG", 3),
             *self._get_recover_segment_asm("LCL", 4),
             "@R14",
-            "0;JMP"
+            "A=M",
+            "0;JMP",
         ]
         self._write_statements(statements)
 
