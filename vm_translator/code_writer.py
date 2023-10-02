@@ -4,7 +4,7 @@ from typing import List
 
 class CodeWriter:
     def __init__(self, file_path: str):
-        self._file = open(file_path, "w+")
+        self._file = open(file_path, "w")
         self._file_base_name = Path(file_path).stem
         self._current_function_name = ""
         self._branch_index = 1
@@ -337,3 +337,14 @@ class CodeWriter:
             f"@{segment}",
             "M=D",
         ]
+
+    def write_bootstrap(self):
+        statements = [
+            "// bootstrap",
+            "@256",
+            "D=A",
+            "@SP",
+            "M=D",
+        ]
+        self._write_statements(statements)
+        self.write_call("Sys.init", 0)

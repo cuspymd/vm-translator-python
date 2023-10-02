@@ -1,5 +1,6 @@
 import sys
 import os
+import argparse
 from pathlib import Path
 
 from vm_translator.parser import Parser
@@ -7,12 +8,12 @@ from vm_translator.code_writer import CodeWriter
 from vm_translator.command import CommandType
 
 
-def translate(input_path_str: str):
+def translate(input_path_str: str, need_bootstrap=False):
     input_path = Path(input_path_str)
     if input_path.is_file():
         translate_file(input_path_str)
     elif input_path.is_dir():
-        translate_folder(input_path)
+        translate_folder(input_path, need_bootstrap)
 
 
 def translate_file(input_path: str) -> Path:
@@ -51,12 +52,16 @@ def translate_file(input_path: str) -> Path:
     return Path(output_path)
 
 
-def translate_folder(input_folder: Path):
+def translate_folder(input_folder: Path, need_bootstrap=False):
     vm_files = sorted(input_folder.glob("*.vm"))
     asm_files = [translate_file(str(vm_file)) for vm_file in vm_files]
     out_file_path = input_folder / f"{input_folder.name}.asm"
 
-    with out_file_path.open(mode="w") as out_file:
+    with CodeWriter(str(out_file_path)) as code_writer:
+        if need_bootstrap:
+            code_writer.write_bootstrap()
+
+    with out_file_path.open(mode="a") as out_file:
         for asm_file_path in asm_files:
             with asm_file_path.open(mode="r") as asm_file:
                 asm_text = asm_file.read()
@@ -66,6 +71,13 @@ def translate_folder(input_folder: Path):
 
 
 if __name__ == "__main__":
-    print(f"Start translating for '{sys.argv[1]}'")
-    translate(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_path")
+    parser.add_argument("--no-bootstrap", action="store_true")
+    args = parser.parse_args()
+
+    print(f"Start translating for '{args.input_path}'")
+
+    need_bootstrap = not args.no_bootstrap
+    translate(args.input_path, need_bootstrap=need_bootstrap)
     print("Completed")
