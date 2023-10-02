@@ -17,6 +17,9 @@ class TestMain(unittest.TestCase):
     def test_main_given_folder(self):
         self._test_vm("TestFolder")
 
+    def test_main_given_multi_comparison_commands(self):
+        self._test_vm("TestInternalSymbol")
+
     def _test_vm(self, test_dest: str):
         test_name = Path(test_dest).stem
         main.translate(f"test_data/{test_dest}")

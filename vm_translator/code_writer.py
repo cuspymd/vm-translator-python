@@ -3,13 +3,12 @@ from typing import List
 
 
 class CodeWriter:
-    _return_index = 1
-
     def __init__(self, file_path: str):
         self._file = open(file_path, "w+")
         self._file_base_name = Path(file_path).stem
         self._current_function_name = ""
         self._branch_index = 1
+        self._return_index = 1
         self._first_pop = [
             "@SP",
             "M=M-1",
@@ -97,14 +96,14 @@ class CodeWriter:
         }
         statements = [
             "D=M-D",
-            f"@THEN{self._branch_index}",
+            f"@{self._get_label_prefix()}_THEN{self._branch_index}",
             f"D;{jump_symbol_table[command]}",
             "D=0",
-            f"@END{self._branch_index}",
+            f"@{self._get_label_prefix()}_END{self._branch_index}",
             "0;JMP",
-            f"(THEN{self._branch_index})",
+            f"({self._get_label_prefix()}_THEN{self._branch_index})",
             "D=-1",
-            f"(END{self._branch_index})",
+            f"({self._get_label_prefix()}_END{self._branch_index})",
         ]
         self._branch_index += 1
         return statements

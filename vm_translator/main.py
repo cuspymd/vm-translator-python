@@ -14,6 +14,7 @@ def translate(input_path_str: str):
     elif input_path.is_dir():
         translate_folder(input_path)
 
+
 def translate_file(input_path: str) -> Path:
     folder_path, file_name = os.path.split(input_path)
     file_base_name, _ = os.path.splitext(file_name)
@@ -51,13 +52,18 @@ def translate_file(input_path: str) -> Path:
 
 
 def translate_folder(input_folder: Path):
-    vm_files = input_folder.glob("*.vm")
+    vm_files = sorted(input_folder.glob("*.vm"))
     asm_files = [translate_file(str(vm_file)) for vm_file in vm_files]
-
     out_file_path = input_folder.with_suffix(".asm")
+
     with out_file_path.open(mode="w") as out_file:
-        for asm_file in asm_files:
-            
+        for asm_file_path in asm_files:
+            with asm_file_path.open(mode="r") as asm_file:
+                asm_text = asm_file.read()
+                out_file.write(f"// > {asm_file_path.name}\n{asm_text}")
+
+            asm_file_path.unlink()
+
 
 if __name__ == "__main__":
     print(f"Start translating for '{sys.argv[1]}'")

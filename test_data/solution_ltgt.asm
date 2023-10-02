@@ -7,14 +7,14 @@
   M=M-1
   A=M
   D=M-D
-  @THEN1
+  @ltgt_THEN1
   D;JLT
   D=0
-  @END1
+  @ltgt_END1
   0;JMP
-(THEN1)
+(ltgt_THEN1)
   D=-1
-(END1)
+(ltgt_END1)
   @SP
   A=M
   M=D
@@ -29,14 +29,14 @@
   M=M-1
   A=M
   D=M-D
-  @THEN2
+  @ltgt_THEN2
   D;JGT
   D=0
-  @END2
+  @ltgt_END2
   0;JMP
-(THEN2)
+(ltgt_THEN2)
   D=-1
-(END2)
+(ltgt_END2)
   @SP
   A=M
   M=D
